@@ -79,10 +79,10 @@ body.wrong{
     display:none;
 }
 
-.score {
-    text-align:center;
-    margin-top: 20px;
+.score{
+    margin-top:15px;
     font-size:1.3rem;
+    text-align:center;
 }
 </style>
 </head>
@@ -102,7 +102,8 @@ body.wrong{
 </div>
 
 <div class="score">
-    Score: <span id="right-answers">0</span>
+    Score: <span id="right-answers">0</span> |
+    Time Left: <span id="time">60</span>s
 </div>
 
 <script>
@@ -112,9 +113,12 @@ const questionContainer = document.getElementById("questions-container");
 const questionElement = document.getElementById("question");
 const answerButtonsElement = document.getElementById("answer-buttons");
 const scoreElement = document.getElementById("right-answers");
+const timeElement = document.getElementById("time");
 
 let shuffledQuestions, currentQuestionIndex;
 let quizScore = 0;
+let timeLeft = 60;
+let timerInterval;
 
 startButton.addEventListener("click", startGame);
 nextButton.addEventListener("click", () => {
@@ -126,10 +130,26 @@ function startGame() {
     startButton.classList.add("hide");
     quizScore = 0;
     scoreElement.innerText = quizScore;
+
+    timeLeft = 60;
+    timeElement.innerText = timeLeft;
+    clearInterval(timerInterval);
+    timerInterval = setInterval(startTimer, 1000);
+
     shuffledQuestions = questions.sort(() => Math.random() - 0.5);
     currentQuestionIndex = 0;
     questionContainer.classList.remove("hide");
     setNextQuestion();
+}
+
+function startTimer() {
+    timeLeft--;
+    timeElement.innerText = timeLeft;
+
+    if (timeLeft <= 0) {
+        clearInterval(timerInterval);
+        endQuiz();
+    }
 }
 
 function setNextQuestion() {
@@ -163,7 +183,6 @@ function selectAnswer(e) {
     const selectedButton = e.target;
     const correct = selectedButton.dataset.correct === "true";
 
-    // Disable all buttons after one click
     Array.from(answerButtonsElement.children).forEach(button => {
         button.disabled = true;
         setStatusClass(button, button.dataset.correct === "true");
@@ -177,20 +196,24 @@ function selectAnswer(e) {
     if (currentQuestionIndex < shuffledQuestions.length - 1) {
         nextButton.classList.remove("hide");
     } else {
-        startButton.innerText = "Restart";
-        startButton.classList.remove("hide");
-        questionElement.innerText = `Quiz Finished! Final Score: ${quizScore}/${shuffledQuestions.length}`;
-        answerButtonsElement.innerHTML = "";
+        clearInterval(timerInterval);
+        endQuiz();
     }
+}
+
+function endQuiz() {
+    questionElement.innerText =
+        `Quiz Finished! Final Score: ${quizScore}/${shuffledQuestions.length}`;
+    answerButtonsElement.innerHTML = "";
+    nextButton.classList.add("hide");
+    startButton.innerText = "Restart";
+    startButton.classList.remove("hide");
 }
 
 function setStatusClass(element, correct) {
     clearStatusClass(element);
-    if (correct === true) {
-        element.classList.add("correct");
-    } else if (correct === false) {
-        element.classList.add("wrong");
-    }
+    if (correct) element.classList.add("correct");
+    else element.classList.add("wrong");
 }
 
 function clearStatusClass(element) {
@@ -225,25 +248,25 @@ const questions = [
         ]
     },
     {
-       question: "Which languge is considered as base of all languege?",
-       answers: [
-           {text: "C", correct: true },
-           {text: "C++", correct: false },
-           {text: "Python", correct: false },
-           {text: "Java", correct: false }
-    ]
-    },
-    {
-        question: "Which is of the following is both procedural and object oriented programming languge?",
+        question: "Which language is considered the base of all languages?",
         answers: [
-           {text: "C", correct: false },
-           {text: "C++", correct: true },
-           {text: "JavaScript", correct: false},
-           {text: "Html", correct: false }
+            { text: "C", correct: true },
+            { text: "C++", correct: false },
+            { text: "Python", correct: false },
+            { text: "Java", correct: false }
         ]
     },
     {
-     question: "What does HTML stand for?",
+        question: "Which is both procedural and object-oriented?",
+        answers: [
+            { text: "C", correct: false },
+            { text: "C++", correct: true },
+            { text: "JavaScript", correct: false },
+            { text: "HTML", correct: false }
+        ]
+    },
+    {
+        question: "What does HTML stand for?",
         answers: [
             { text: "Hyper Text Markup Language", correct: true },
             { text: "High Text Machine Language", correct: false },
@@ -263,14 +286,14 @@ const questions = [
     {
         question: "What does CSS stand for?",
         answers: [
-            { text: "CASCADING STYLE SHEET", correct: true },
-            { text: "CASCADING SUPER SHEET", correct: false },
-            { text: "CASUALT STYLE SHEET", correct: false },
-            { text: "CASUAL STORE SHEET  ", correct: false }
+            { text: "Cascading Style Sheet", correct: true },
+            { text: "Cascading Super Sheet", correct: false },
+            { text: "Casual Style Sheet", correct: false },
+            { text: "Casual Store Sheet", correct: false }
         ]
     },
     {
-        question: "Which language is used for creating dyanmic web pages?",
+        question: "Which language creates dynamic web pages?",
         answers: [
             { text: "HTML", correct: false },
             { text: "CSS", correct: false },
@@ -279,15 +302,17 @@ const questions = [
         ]
     },
     {
-        question: "What is the correct symbol for comments in JavaScript?",
+        question: "Correct symbol for comments in JavaScript?",
         answers: [
             { text: "//", correct: true },
             { text: "<!-- -->", correct: false },
             { text: "#", correct: false },
             { text: "/* */", correct: false }
         ]
-    },
+    }
 ];
 </script>
+
 </body>
 </html>
+
